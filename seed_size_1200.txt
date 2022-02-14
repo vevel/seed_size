@@ -1,0 +1,40 @@
+src = getDirectory("Input folder where images are stored");
+dest = getDirectory("Output folder for results");
+
+
+files = getFileList(src);
+
+
+print(files.length);
+
+for (w = 0;  w < files.length; w++) {
+
+	filename = files[w];
+	print(src + filename);
+	open(src + filename);
+	
+	run("Set Scale...", "distance=1200 known=25.4 pixel=1 unit=mm");
+	run("Set Measurements...", "area centroid bounding fit perimeter redirect=None decimal=3");
+		
+	// BW Thresholder
+	run("8-bit");
+	setAutoThreshold("Default dark");
+	setThreshold(20, 255);
+	run("Convert to Mask");
+
+	// particle Analyses
+	run("Analyze Particles...", "size=0.04-0.25 circularity=0.70-1.00 show=Nothing display summarize record");
+
+	selectWindow(filename);
+	close();
+	
+	selectWindow("Results");
+	saveAs("Text", dest + filename + "_0.04-0.25_0.70-1.00_results_mm.txt");
+	run("Clear Results");
+
+}
+
+selectWindow("Summary");
+saveAs("Text", dest + "summary_0.04-0.25_0.70-1.00_mm.txt");
+close();
+
